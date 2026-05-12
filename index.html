@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор оцінок</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --text: #1a1a18;
+  --muted: #888884;
+  --border: rgba(0,0,0,0.08);
+  --border-md: rgba(0,0,0,0.14);
+  --success: #2d7a4f;
+  --success-bg: #e8f5ee;
+  --warn: #8a6200;
+  --warn-bg: #fef3d0;
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.page {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px 72px;
+  animation: fadeUp .28s ease;
+}
+.page.active { display: flex; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wrap { width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 12px; }
+
+/* typography */
+h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+/* cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  border: 0.5px solid var(--border);
+  padding: 24px 26px;
+}
+
+.hero-card {
+  background: var(--text);
+  border-radius: var(--r-xl);
+  padding: 28px 28px 24px;
+  color: #fff;
+}
+
+/* buttons */
+button { cursor: pointer; font-family: 'Manrope', sans-serif; border: none; outline: none; transition: .15s; }
+
+.btn-primary {
+  background: var(--text);
+  color: #fff;
+  border-radius: 50px;
+  padding: 15px 28px;
+  font-size: .92rem;
+  font-weight: 600;
+  width: 100%;
+  letter-spacing: .1px;
+}
+.btn-primary:hover { opacity: .82; }
+.btn-primary:active { transform: scale(.98); }
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 50px;
+  padding: 13px 24px;
+  font-size: .9rem;
+  font-weight: 600;
+  border: 0.5px solid var(--border-md);
+}
+.btn-secondary:hover { background: #e8e7e1; }
+
+.btn-danger-out {
+  background: transparent;
+  color: var(--danger);
+  border: 0.5px solid rgba(192,57,43,.35);
+  border-radius: 50px;
+  padding: 13px 24px;
+  font-size: .9rem;
+  font-weight: 600;
+}
+.btn-danger-out:hover { background: var(--danger-bg); }
+
+.btn-del {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-del:hover { opacity: .75; }
+
+.btn-add {
+  background: transparent;
+  color: var(--muted);
+  border: 0.5px dashed var(--border-md);
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  font-size: .85rem;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 6px;
+}
+.btn-add:hover { background: var(--surface2); color: var(--text); }
+
+.back-btn {
+  background: none;
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 600;
+  align-self: flex-start;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+.back-btn:hover { color: var(--text); }
+
+/* inputs */
+input[type=text], input[type=number] {
+  background: var(--surface2);
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--r-md);
+  padding: 11px 16px;
+  font-size: .92rem;
+  font-family: 'Manrope', sans-serif;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+input::placeholder { color: #bbb; }
+input:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(26,26,24,.08); }
+
+/* hero section */
+.hero-label {
+  font-size: .73rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 10px;
+}
+.hero-score {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.hero-sub { color: rgba(255,255,255,.45); font-size: .82rem; margin-top: 8px; }
+
+/* subject cards */
+.subj-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 18px 22px;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  border: 0.5px solid var(--border);
+  transition: .15s;
+}
+.subj-card:hover { border-color: var(--border-md); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+.subj-name { font-weight: 600; color: var(--text); font-size: .95rem; margin-bottom: 3px; }
+.subj-cnt { color: var(--muted); font-size: .77rem; }
+
+/* badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;
+  border-radius: 50px;
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: 'Unbounded', sans-serif;
+  white-space: nowrap;
+}
+.badge.hi { background: var(--success-bg); color: var(--success); }
+.badge.mi { background: var(--warn-bg); color: var(--warn); }
+.badge.lo { background: var(--danger-bg); color: var(--danger); }
+
+/* form */
+.wlbl { font-size: .78rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+.grade-row { display: flex; gap: 8px; align-items: center; }
+.grade-row input { flex: 1; width: auto; }
+.grades-list { display: flex; flex-direction: column; gap: 8px; }
+.form-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.err { color: var(--danger); font-size: .82rem; text-align: center; min-height: 18px; }
+
+/* detail */
+.grade-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.grade-item:last-child { border-bottom: none; }
+.gi-lbl { color: var(--muted); font-size: .88rem; }
+.gi-val { font-family: 'Unbounded', sans-serif; font-size: .95rem; font-weight: 700; }
+.list-header { color: var(--muted); font-size: .73rem; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .6px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.empty { color: var(--muted); text-align: center; padding: 24px 0; font-size: .88rem; }
+
+.hi { color: var(--success) !important; }
+.mi { color: var(--warn) !important; }
+.lo { color: var(--danger) !important; }
+</style>
+</head>
+<body>
+
+<!-- ГОЛОВНА -->
+<div class="page active" id="pg-home">
+  <h1>Оцінки</h1>
+  <div class="wrap">
+    <div class="hero-card">
+      <div class="hero-label">Загальний середній бал</div>
+      <div class="hero-score" id="overall">—</div>
+      <div class="hero-sub" id="s-count">Немає предметів</div>
+    </div>
+    <button class="btn-primary" onclick="openForm()">+ Додати предмет</button>
+    <div id="s-list"></div>
+  </div>
+</div>
+
+<!-- ФОРМА -->
+<div class="page" id="pg-form">
+  <div class="wrap">
+    <button class="back-btn" onclick="goHome()">← Назад</button>
+    <h1 id="form-title">Новий предмет</h1>
+    <div class="card">
+      <div class="wlbl">Назва предмета</div>
+      <input type="text" id="inp-name" placeholder="Наприклад: математика">
+    </div>
+    <div class="card">
+      <div class="wlbl">Оцінки</div>
+      <div class="grades-list" id="grades-list"></div>
+      <button class="btn-add" onclick="addRow()">+ Додати оцінку</button>
+    </div>
+    <div class="err" id="form-err"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="goHome()">Скасувати</button>
+      <button class="btn-primary" style="width:auto" onclick="saveSubject()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- ДЕТАЛІ -->
+<div class="page" id="pg-detail">
+  <div class="wrap">
+    <button class="back-btn" onclick="goHome()">← Назад</button>
+    <h1 id="d-title"></h1>
+    <div class="hero-card">
+      <div class="hero-label">Середній бал</div>
+      <div class="hero-score" id="d-score"></div>
+      <div class="hero-sub" id="d-cnt"></div>
+    </div>
+    <div class="card">
+      <div class="list-header">Всі оцінки</div>
+      <div id="d-grades"></div>
+    </div>
+    <div class="actions">
+      <button class="btn-secondary" onclick="editSubject()">Редагувати</button>
+      <button class="btn-danger-out" onclick="deleteSubject()">Видалити</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let subjects = JSON.parse(localStorage.getItem('grades') || '[]');
+let editIdx = null, viewIdx = null;
+const $ = id => document.getElementById(id);
+const save = () => localStorage.setItem('grades', JSON.stringify(subjects));
+const avg = arr => arr.reduce((a,b) => a+b, 0) / arr.length;
+const cls = v => v >= 10 ? 'hi' : v >= 7 ? 'mi' : 'lo';
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const plural = (n,a,b,c) => { const m=n%10,M=n%100; return m===1&&M!==11?a:[2,3,4].includes(m)&&![12,13,14].includes(M)?b:c; };
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  if (!subjects.length) {
+    $('overall').textContent = '—';
+    $('overall').className = 'hero-score';
+    $('s-count').textContent = 'Немає предметів';
+    $('s-list').innerHTML = '<div class="empty">Поки що предметів немає. Додайте перший!</div>';
+  } else {
+    const avgs = subjects.map(s => avg(s.grades));
+    const ov = (avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2);
+    $('overall').textContent = ov;
+    $('overall').className = 'hero-score';
+    $('s-count').textContent = subjects.length + ' ' + plural(subjects.length,'предмет','предмети','предметів');
+    $('s-list').innerHTML = subjects.map((s,i) => {
+      const a = avg(s.grades).toFixed(2), n = s.grades.length;
+      return `<div class="subj-card" onclick="openDetail(${i})">
+        <div>
+          <div class="subj-name">${esc(s.name)}</div>
+          <div class="subj-cnt">${n} ${plural(n,'оцінка','оцінки','оцінок')}</div>
+        </div>
+        <span class="badge ${cls(+a)}">${a}</span>
+      </div>`;
+    }).join('');
+  }
+  showPage('pg-home');
+}
+
+function openForm(idx = null) {
+  editIdx = idx;
+  $('form-title').textContent = idx !== null ? 'Редагувати предмет' : 'Новий предмет';
+  $('form-err').textContent = '';
+  $('grades-list').innerHTML = '';
+  if (idx !== null) {
+    $('inp-name').value = subjects[idx].name;
+    subjects[idx].grades.forEach(g => addRow(g));
+  } else {
+    $('inp-name').value = '';
+    addRow();
+  }
+  showPage('pg-form');
+}
+
+function addRow(val = '') {
+  const row = document.createElement('div');
+  row.className = 'grade-row';
+  row.innerHTML = `<input type="number" min="1" max="12" step="1" placeholder="Оцінка (1–12)" value="${val}">
+    <button class="btn-del" onclick="this.parentElement.remove()">×</button>`;
+  $('grades-list').appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function saveSubject() {
+  const name = $('inp-name').value.trim();
+  const err = $('form-err');
+  if (!name) { err.textContent = 'Введіть назву предмета'; return; }
+  const grades = [];
+  for (const inp of $('grades-list').querySelectorAll('input')) {
+    if (!inp.value) continue;
+    const v = +inp.value;
+    if (!Number.isInteger(v) || v < 1 || v > 12) { err.textContent = 'Оцінки мають бути від 1 до 12'; return; }
+    grades.push(v);
+  }
+  if (!grades.length) { err.textContent = 'Додайте хоча б одну оцінку'; return; }
+  if (editIdx !== null) subjects[editIdx] = { name, grades };
+  else subjects.push({ name, grades });
+  save();
+  goHome();
+}
+
+function openDetail(i) {
+  viewIdx = i;
+  const s = subjects[i];
+  const a = avg(s.grades).toFixed(2), n = s.grades.length;
+  $('d-title').textContent = s.name;
+  $('d-score').textContent = a;
+  $('d-score').className = 'hero-score';
+  $('d-cnt').textContent = n + ' ' + plural(n,'оцінка','оцінки','оцінок');
+  $('d-grades').innerHTML = s.grades.map((g,i) =>
+    `<div class="grade-item">
+      <span class="gi-lbl">Оцінка ${i+1}</span>
+      <span class="gi-val ${cls(g)}">${g}</span>
+    </div>`
+  ).join('');
+  showPage('pg-detail');
+}
+
+function editSubject() { openForm(viewIdx); }
+
+function deleteSubject() {
+  if (!confirm(`Видалити "${subjects[viewIdx].name}"?`)) return;
+  subjects.splice(viewIdx, 1);
+  save();
+  goHome();
+}
+
+goHome();
+</script>
+</body>
+</html>
